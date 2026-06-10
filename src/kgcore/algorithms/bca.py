@@ -11,7 +11,7 @@ class BCA:
 
     def __init__(self, hypergraph: Hypergraph) -> None:
         self.G = hypergraph
-        self._support_cache: dict[tuple[str, str], int] = {}
+        # self._support_cache: dict[tuple[str, str], int] = {}
         self.k_cores: dict[tuple[int, int], set[str]] = {}
         self.coreness: dict[tuple[int, int], set[str]] = {}
         # self.precompute_all_supports()
@@ -113,21 +113,6 @@ class BCA:
         return result
     
 
-    # def precompute_all_supports(self) -> None:
-    #     for edge_id, verts in self.G.edges().items():
-    #         verts_list = list(verts)
-    #         w_e = (
-    #             self.G.edge_weight(edge_id, default=1.0)
-    #             if isinstance(self.G, Hypergraph)
-    #             else 1.0
-    #         )
-    #         for i in range(len(verts_list)):
-    #             for j in range(i + 1, len(verts_list)):
-    #                 key = (min(verts_list[i], verts_list[j]),
-    #                     max(verts_list[i], verts_list[j]))
-    #                 self._support_cache[key] = (
-    #                     self._support_cache.get(key, 0.0) + w_e
-    #             )
     
 
     
