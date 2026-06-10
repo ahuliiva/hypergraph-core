@@ -6,6 +6,7 @@ from kgcore.algorithms.bca import BCA
 from kgcore.types import CoreParams
 import time
 from tqdm import tqdm
+import tracemalloc
 
 
 def main() -> None:
@@ -26,12 +27,16 @@ def main() -> None:
     print(f"\nBCA init..")
     bca = BCA(hypergraph)
     print(f"\nBCA compute")
-    start = time.perf_counter()
+    tracemalloc.start()
+    # start = time.perf_counter()
     bca_result = bca.compute()
-    print(f"\nBCA calculated in  {time.perf_counter() - start:.8f}s")
+    # print(f"\nBCA calculated in  {time.perf_counter() - start:.8f}s")
+    current, peak = tracemalloc.get_traced_memory()
+    tracemalloc.stop()
+    print(f"Пиковая память: {peak / 1024 / 1024:.4f} MB")
     
     print(f"BCA result size: {len(bca_result)}")
-    print(f"BCA coreness: {bca.coreness}")
+    print(f"BCA coreness len: {len(bca.coreness)}")
 
 
 

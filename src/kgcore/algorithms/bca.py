@@ -37,29 +37,29 @@ class BCA:
 
     def compute(self) -> dict[tuple[int, int], set[str]]:
         D: dict[tuple[int, int], set[str]] = {}
+
+        max_g = max(self.G.support_index.values(), default=0)
+        print(f"max_g = {max_g}, всего итераций: {max_g}")
+        prev_active = set(self.G.vertices())
         g = 1
         while True:
             buckets: dict[int, set[str]] = defaultdict(set)
             g_neighbor_count: dict[str, int] = {}
             active: set[str] = set()
 
-            print(f"\ng={g}")
-            nuum = len(self.G.vertices())
-            print(f"число вершин: {nuum} ")
-            i = 0
-            for v in self.G.vertices():
-                
-                # print(f"\nv[{v}] -> {i}")
-                print(f"\t{i/nuum}%", end="\r", flush=True)
-                i = i + 1
-                nbrs = self.get_g_neighbors(v, g, self.G.vertices())
-                # print(f"{len(nbrs)}")
+            seed = prev_active.copy()
+            nuum = len(seed)
+            print(f"\ng={g} число вершин: {nuum} ")
+            
+            
+            for v in tqdm(seed, desc=f"g={g}"):
+                nbrs = self.get_g_neighbors(v, g, seed)
                 if nbrs:
                     g_neighbor_count[v] = len(nbrs)
                     buckets[len(nbrs)].add(v)
                     active.add(v)
 
-            print(f"\nactive size: {len(active)}")
+            # print(f"\nactive size: {len(active)}")
             
             if not active:
                 break
@@ -67,16 +67,16 @@ class BCA:
             k = 0
             while active:
                 k += 1
-                print(f"\nk={k}, active size: {len(active)}")
+                # print(f"\nk={k}, active size: {len(active)}")
                 queue = deque(v for j, s in buckets.items() if j < k for v in s)
-                print(f"\nqueue size: {len(queue)}")
+                # print(f"\nqueue size: {len(queue)}")
                 while queue:
                     v = queue.pop()
                     if v not in active:
                         continue
                     nbrs = self.get_g_neighbors(v, g, active)
                     active.discard(v)
-                    print(f"\n discard {v}, active size: {len(active)}")
+                    # print(f"\n discard {v}, active size: {len(active)}")
                     buckets[g_neighbor_count[v]].discard(v)
                     for w in nbrs:
                         if w in active and w not in queue:
@@ -88,8 +88,13 @@ class BCA:
                 if active:
                     D[(k, g)] = active.copy()
                     self.k_cores[(k, g)] = active.copy()
+            # max_core_for_this_g — вершины с максимальным k при данном g
+            # это те что выжили дольше всего = active последнего непустого k
+            # в D[(k_max, g)] уже записан правильный результат
+            # для следующей итерации берём объединение всех core при этом g:
+            prev_active = set.union(*[v for (ki, gi), v in D.items() if gi == g], set())
+            # print(f"\nprev_active : {prev_active}")
             g += 1
-
         self.coreness = self._deduplication(self.k_cores)
         return D
 
