@@ -1,5 +1,6 @@
 from kgcore.hypergraph import Hypergraph
 from kgcore.algorithms import BCA
+import time
 
 
 def create_example_hypergraph() -> Hypergraph:
@@ -18,8 +19,13 @@ def create_example_hypergraph() -> Hypergraph:
 def test() -> None:
 
     G = create_example_hypergraph()
+    print(f"\ncalculating support for all>> ")
+    start = time.perf_counter()
+    G.support_index
+    print(f"\nsupport calculated:  {time.perf_counter() - start:.4f}s")
 
     bca = BCA(G)
+
 
     D = bca.compute()
 

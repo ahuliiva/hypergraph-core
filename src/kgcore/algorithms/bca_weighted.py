@@ -127,3 +127,19 @@ class BCA_weighted:
             if V1:
                 result[(k, g)] = V1
         return result
+    
+    def precompute_all_supports(self) -> None:
+        for edge_id, verts in self.G.edges().items():
+            verts_list = list(verts)
+            w_e = (
+                self.G.edge_weight(edge_id, default=1.0)
+                if isinstance(self.G, WeightedHypergraph)
+                else 1.0
+            )
+            for i in range(len(verts_list)):
+                for j in range(i + 1, len(verts_list)):
+                    key = (min(verts_list[i], verts_list[j]),
+                        max(verts_list[i], verts_list[j]))
+                    self._support_cache[key] = (
+                        self._support_cache.get(key, 0.0) + w_e
+                )

@@ -21,6 +21,7 @@ def test() -> None:
 
     bca = BCA(G)
 
+    print("\nBCA!!!")
     D = bca.compute()
 
     print("\nВсе (k,g)-core:")

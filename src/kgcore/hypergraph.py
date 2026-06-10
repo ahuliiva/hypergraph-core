@@ -1,4 +1,6 @@
 from __future__ import annotations
+from functools import cached_property
+
 
 
 class Hypergraph:
@@ -7,25 +9,7 @@ class Hypergraph:
         self._edges: dict[str, frozenset[str]] = {}
         self._incident: dict[str, set[str]] = {}
 
-    @classmethod
-    def from_edge_list(
-        cls,
-        edges: list[list[str] | set[str] | frozenset[str]],
-    ) -> "Hypergraph":
-        """
-        Создаёт гиперграф из списка гиперрёбер.
-        edge_id назначается автоматически: e0, e1, e2, ...
 
-        Пример:
-            H = Hypergraph.from_edge_list([
-                {1, 2, 3, 4},
-                {1, 3, 4, 5},
-            ])
-        """
-        g = cls()
-        for i, edge in enumerate(edges):
-            g.add_edge(f"e{i}", {str(v) for v in edge})
-        return g
 
     def add_vertex(self, vertex: str) -> None:
         self._vertices.add(vertex)
@@ -73,6 +57,47 @@ class Hypergraph:
                 if weight is not None:
                     subgraph.set_vertex_weight(vertex, weight)
         return subgraph
+    
+
+    @cached_property
+    def support_index(self) -> dict[tuple[str, str], int]:
+        """
+        Предвычисляет s(u,v) для всех пар вершин.
+        s(u,v) = количество общих гиперрёбер.
+        Считается один раз при первом обращении.
+        """
+        index: dict[tuple[str, str], int] = {}
+        for verts in self._edges.values():
+            verts_list = list(verts)
+            for i in range(len(verts_list)):
+                for j in range(i + 1, len(verts_list)):
+                    key = (min(verts_list[i], verts_list[j]),
+                        max(verts_list[i], verts_list[j]))
+                    index[key] = index.get(key, 0) + 1
+        return index
+    
+    @classmethod
+    def from_edge_list(
+        cls,
+        edges: list[list[str] | set[str] | frozenset[str]],
+    ) -> "Hypergraph":
+        """
+        Создаёт гиперграф из списка гиперрёбер.
+        edge_id назначается автоматически: e0, e1, e2, ...
+
+        Пример:
+            H = Hypergraph.from_edge_list([
+                {1, 2, 3, 4},
+                {1, 3, 4, 5},
+            ])
+        """
+        g = cls()
+        for i, edge in enumerate(edges):
+            g.add_edge(f"e{i}", {str(v) for v in edge})
+        return g
+    
+
+     
 
 
 class WeightedHypergraph(Hypergraph):
